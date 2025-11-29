@@ -11,7 +11,6 @@ async def security_reviewer(queue: asyncio.Queue):
             installation_token = await get_installation_token(int(pr_message.installation_id), env.APP_ID, env.PRIVATE_KEY)
             diff = await fetch_diff(installation_token, pr_message)
             llm_model = await get_prefered_llm(pr_message, installation_token)
-            print(f"Using LLM model: {llm_model} for security review")
             agent = AgentFactory.create_agent(AgentType.SECURITY_REVIEWER, llm_model)
             if agent is None:
                 await write_comment(pr_message, "No suitable security reviewer agent found for this repository.", installation_token)

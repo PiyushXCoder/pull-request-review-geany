@@ -79,7 +79,6 @@ async def get_prefered_llm(
             url,
             headers=headers
         )
-    print(f"Config fetch status code: {res.status_code}")
     if res.status_code == 200:
         config = res.json()
         url = config.get("download_url")
@@ -92,7 +91,6 @@ async def get_prefered_llm(
     if res.status_code == 200:
         config = res.json()
         llm_model = config.get("llm_model", "gemini-2.5-flash")
-        print(f"Preferred LLM model from config: {llm_model}")
         return llm_model
 
 

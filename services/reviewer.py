@@ -1,7 +1,7 @@
 import asyncio
 import os
 
-from utils.github import get_installation_token, fetch_diff, write_comment, get_prefered_agent
+from utils.github import get_installation_token, fetch_diff, write_comment, get_prefered_llm 
 from agents.factory import AgentType, AgentFactory
 
 APP_ID = os.getenv("APP_ID")
@@ -14,7 +14,8 @@ async def security_reviewer(queue: asyncio.Queue):
             pr_message = await queue.get()
             installation_token = await get_installation_token(int(pr_message.installation_id), str(APP_ID), PRIVATE_KEY)
             diff = await fetch_diff(installation_token, pr_message)
-            llm_model = await get_prefered_agent(pr_message)
+            llm_model = await get_prefered_llm(pr_message, installation_token)
+            print(f"Using LLM model: {llm_model} for security review")
             agent = AgentFactory.create_agent(AgentType.SECURITY_REVIEWER, llm_model)
             if agent is None:
                 await write_comment(pr_message, "No suitable security reviewer agent found for this repository.", installation_token)
@@ -36,7 +37,7 @@ async def tidyness_reviewer(queue: asyncio.Queue):
             pr_message = await queue.get()
             installation_token = await get_installation_token(int(pr_message.installation_id), str(APP_ID), PRIVATE_KEY)
             diff = await fetch_diff(installation_token, pr_message)
-            llm_model = await get_prefered_agent(pr_message)
+            llm_model = await get_prefered_llm(pr_message, installation_token)
             agent = AgentFactory.create_agent(AgentType.TIDYNESS_REVIEWER, llm_model)
             if agent is None:
                 await write_comment(pr_message, "No suitable security reviewer agent found for this repository.", installation_token)

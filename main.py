@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from fastapi.responses import FileResponse
 import env # Ensure environment variables are loaded
 
 from contextlib import asynccontextmanager
@@ -35,7 +36,11 @@ app = FastAPI(lifespan=lifespan)
 
 @app.get("/")
 async def health_check():
-    return {"message": "Welcome to pull resuest review geany!"}
+    return FileResponse("views/index.html")
+
+@app.get("/logo.png")
+async def logo():
+    return FileResponse("logo.png")
 
 
 app.include_router(github.router)

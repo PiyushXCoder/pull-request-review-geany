@@ -1,0 +1,33 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: 
+      - "master"
+
+jobs:
+  push-store-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write   
+      id-token: write  
+
+    steps:
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@v4  
+
+      - name: 'Login to GitHub Container Registry'
+        uses: docker/login-action@v3  
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 'Build and Push Docker Image'
+        run: |
+          docker buildx create --name builder1 --use --bootstrap
+          docker buildx build \
+            --platform linux/amd64 \
+             --tag ghcr.io/${GITHUB_REPOSITORY,,}:latest \
+            --push .

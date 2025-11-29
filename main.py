@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-from dotenv import load_dotenv
-load_dotenv()
+import env # Ensure environment variables are loaded
 
 from contextlib import asynccontextmanager
 from fastapi import FastAPI

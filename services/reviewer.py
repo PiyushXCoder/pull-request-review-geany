@@ -1,18 +1,14 @@
 import asyncio
-import os
 
+import env
 from utils.github import get_installation_token, fetch_diff, write_comment, get_prefered_llm 
 from agents.factory import AgentType, AgentFactory
-
-APP_ID = os.getenv("APP_ID")
-with open(str(os.getenv("PRIVATE_KEY_FILE")), "r") as key_file:
-    PRIVATE_KEY = key_file.read()
 
 async def security_reviewer(queue: asyncio.Queue):
     while True:
         try:
             pr_message = await queue.get()
-            installation_token = await get_installation_token(int(pr_message.installation_id), str(APP_ID), PRIVATE_KEY)
+            installation_token = await get_installation_token(int(pr_message.installation_id), env.APP_ID, env.PRIVATE_KEY)
             diff = await fetch_diff(installation_token, pr_message)
             llm_model = await get_prefered_llm(pr_message, installation_token)
             print(f"Using LLM model: {llm_model} for security review")
@@ -35,7 +31,7 @@ async def tidyness_reviewer(queue: asyncio.Queue):
     while True:
         try:
             pr_message = await queue.get()
-            installation_token = await get_installation_token(int(pr_message.installation_id), str(APP_ID), PRIVATE_KEY)
+            installation_token = await get_installation_token(int(pr_message.installation_id), env.APP_ID, env.PRIVATE_KEY)
             diff = await fetch_diff(installation_token, pr_message)
             llm_model = await get_prefered_llm(pr_message, installation_token)
             agent = AgentFactory.create_agent(AgentType.TIDYNESS_REVIEWER, llm_model)

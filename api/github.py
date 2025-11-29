@@ -21,19 +21,21 @@ def verify_github_signature(secret: str, signature: str, payload: bytes) -> bool
 
 
 @router.post("/webhook")
-async def webhook(request: Request,  x_hub_signature_256: str = Header(None)):
+async def webhook(request: Request,  x_hub_signature_256: str = Header(None), x_github_event: str = Header(None)):
     body = await request.body()
     if not verify_github_signature(str(WEBHOOK_SECRET), x_hub_signature_256, body):
         return {"message": "Invalid signature"}, 401
     
     payload = await request.json()
 
+    if not (x_github_event == "pull_request" and payload.get("action") in ["opened", "synchronize"]):
+        return {"message": "Event ignored"}
+
     message = ReviewPullRequestMessage(
         installation_id=str(payload["installation"]["id"]),
         repo_owner=str(payload["repository"]["owner"]["login"]),
         repo_name=str(payload["repository"]["name"]),
-        pr_number=int(payload["pull_request"]["number"])
-
+        pr_number=int(payload["pull_request"]["number"]),
     )
 
     await request.app.state.security_reviewer_event_queue.put(message)

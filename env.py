@@ -31,3 +31,8 @@ except Exception as e:
     exit(1)
 PRIVATE_KEY = str(PRIVATE_KEY)
 
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    print("Warning: GEMINI_API_KEY is not set in environment variables.")
+    exit(1)
+GEMINI_API_KEY = str(GEMINI_API_KEY)
